@@ -494,13 +494,12 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  min-height: 100vh;
   align-items: start;
+  /* Remove min-height: 100vh to allow proper scrolling */
 }
 
-/* Higher specificity to override any theme conflicts */
-.post-layout .post-sidebar {
-  position: -webkit-sticky !important; /* Safari support */
+/* Sidebar styling with proper sticky positioning */
+.post-sidebar {
   position: sticky !important;
   top: 2rem !important;
   height: fit-content !important;
@@ -512,28 +511,28 @@ body {
   box-shadow: var(--shadow-light);
   border-left: 4px solid;
   border-image: var(--accent-gradient) 1;
-  z-index: 100;
+  z-index: 100 !important;
+  /* Ensure the sidebar stays in place */
   align-self: start !important;
-  width: 320px !important; /* Fixed width to prevent flexing */
-  min-width: 320px !important;
-  flex-shrink: 0 !important; /* Prevent shrinking */
-  /* Ensure sticky works properly */
-  contain: layout style paint;
-  will-change: transform;
 }
 
-/* Force sticky behavior */
-.post-sidebar {
-  position: -webkit-sticky !important;
-  position: sticky !important;
-  top: 2rem !important;
-  height: fit-content !important;
-  max-height: calc(100vh - 4rem) !important;
-  overflow-y: auto !important;
-  z-index: 100 !important;
-  align-self: flex-start !important;
-  /* Additional sticky positioning fixes */
-  display: block !important;
-  contain: layout style paint;
-  will-change: transform;
+/* Remove the duplicate and conflicting rules */
+.post-layout .post-sidebar {
+  /* All styles moved to .post-sidebar above for consistency */
+}
+
+/* Main content area */
+.post-content {
+  /* Ensure content can scroll naturally */
+  overflow: visible;
+  min-height: 100vh; /* Move min-height here so content determines scroll */
+}
+
+.linear-article {
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  padding: 3rem;
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(255,255,255,0.2);
+  line-height: 1.8;
 }
