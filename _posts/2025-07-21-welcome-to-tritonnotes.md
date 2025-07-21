@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Welcome to TritonNotes!"
-date: 2025-07-21 10:00:00 -0700
+date: 2025-07-20 10:00:00 -0700
 categories: announcement
 tags: [welcome, getting-started]
 ---

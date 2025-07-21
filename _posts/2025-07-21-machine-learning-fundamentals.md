@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Understanding Machine Learning Fundamentals"
-date: 2025-07-21 14:00:00 -0700
+date: 2025-07-20 14:00:00 -0700
 categories: [machine-learning, tutorial]
 tags: [AI, ML, data-science, algorithms, neural-networks]
 ---
