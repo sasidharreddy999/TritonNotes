@@ -71,7 +71,7 @@ title: Welcome to TritonNotes
 ## Quick Access
 
 <div class="quick-links">
-  <a href="/notes/" class="quick-link">
+  <a href="/_posts/" class="quick-link">
     <div class="quick-link-icon">📖</div>
     <div>
       <h4>Browse Notes</h4>
