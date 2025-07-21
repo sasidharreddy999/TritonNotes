@@ -1,59 +1,48 @@
 ---
 ---
 
-/* ===== POST LAYOUT SPECIFIC STYLES ===== */
+/* ===== POST LAYOUT WITH SEPARATE DIVISIONS ===== */
 .post-layout {
   display: flex;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
   min-height: 100vh;
   box-sizing: border-box;
 }
 
-/* ===== COMPLETELY FIXED SIDEBAR ===== */
+/* ===== FIXED SIDEBAR DIVISION (LEFT) ===== */
 .post-sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 320px;
+  width: 350px;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden; /* No scrolling in sidebar */
   background: var(--bg-card, #ffffff);
-  padding: 2rem;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
   border-right: 1px solid rgba(79, 172, 254, 0.2);
   z-index: 1000;
-  /* Custom scrollbar for sidebar */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(79, 172, 254, 0.3) transparent;
 }
 
-.post-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.post-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.post-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(79, 172, 254, 0.3);
-  border-radius: 3px;
-}
-
-.post-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 172, 254, 0.5);
-}
-
-/* ===== CONTENT AREA WITH PROPER OFFSET ===== */
-.post-content {
-  margin-left: 320px;
-  width: calc(100% - 320px);
+.sidebar-content {
   padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== MAIN CONTENT DIVISION (RIGHT) ===== */
+.main-content-division {
+  margin-left: 350px;
+  width: calc(100% - 350px);
   min-height: 100vh;
   background: transparent;
+}
+
+.post-content {
+  padding: 2rem;
+  height: 100%;
 }
 
 .linear-article {
@@ -67,9 +56,16 @@
   margin: 0 auto;
 }
 
-/* ===== SIMPLIFIED POST INFO STYLING ===== */
+/* ===== POST INFO STYLING ===== */
+.post-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .post-info .post-title {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary, #2c3e50);
   margin-bottom: 1.5rem;
@@ -82,6 +78,7 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(79, 172, 254, 0.1);
+  flex-shrink: 0;
 }
 
 .meta-item {
@@ -121,26 +118,24 @@
   border: 1px solid rgba(79, 172, 254, 0.2);
 }
 
-/* ===== SIMPLIFIED TABLE OF CONTENTS ===== */
+/* ===== FIXED TABLE OF CONTENTS - NO SCROLLING ===== */
 .table-of-contents {
   background: rgba(79, 172, 254, 0.05);
   border-radius: 8px;
   border: 1px solid rgba(79, 172, 254, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .toc-header {
   padding: 0.8rem;
   background: rgba(79, 172, 254, 0.1);
-  cursor: pointer;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  transition: background 0.2s ease;
-  user-select: none;
-}
-
-.toc-header:hover {
-  background: rgba(79, 172, 254, 0.15);
+  flex-shrink: 0;
 }
 
 .toc-header h3 {
@@ -150,73 +145,96 @@
   color: var(--text-primary, #2c3e50);
 }
 
-.toc-toggle {
-  font-size: 0.8rem;
-  color: var(--text-secondary, #7f8c8d);
-  transition: transform 0.2s ease;
-  font-weight: bold;
+/* ===== FIXED TOC CONTENT - ALL VISIBLE ===== */
+.toc-content-fixed {
+  flex: 1;
+  overflow: hidden; /* No scrolling */
+  display: flex;
+  flex-direction: column;
 }
 
-/* ===== SIMPLIFIED TOC CONTENT ===== */
-.toc-content {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 0;
-}
-
-.toc-content ul {
+.toc-content-fixed ul {
   list-style: none;
   margin: 0;
   padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.toc-content li {
+.toc-content-fixed li {
   border-bottom: 1px solid rgba(79, 172, 254, 0.05);
+  flex-shrink: 0;
 }
 
-.toc-content li:last-child {
+.toc-content-fixed li:last-child {
   border-bottom: none;
 }
 
-/* Simple TOC Links - No Complex Nesting */
-.toc-content a {
+/* ===== TOPIC LINKS WITH EXPANSION FUNCTIONALITY ===== */
+.toc-content-fixed a {
   display: block;
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 1rem;
   text-decoration: none;
   color: var(--text-primary, #2c3e50);
   font-size: 0.8rem;
   font-weight: 400;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
+  cursor: pointer;
+  user-select: none;
 }
 
-.toc-content a:hover {
+.toc-content-fixed a:hover {
   background: rgba(79, 172, 254, 0.08);
   border-left-color: #4facfe;
   color: #4facfe;
 }
 
-.toc-content a.active {
+.toc-content-fixed a.active {
   background: rgba(79, 172, 254, 0.12);
   border-left-color: #4facfe;
   color: #4facfe;
   font-weight: 500;
 }
 
+.toc-content-fixed a.expanded {
+  background: rgba(79, 172, 254, 0.15);
+  border-left-color: #4facfe;
+  color: #4facfe;
+  font-weight: 600;
+}
+
 /* Indentation for different heading levels */
-.toc-content .toc-h2 a {
+.toc-content-fixed .toc-h2 a {
   padding-left: 1rem;
   font-weight: 500;
 }
 
-.toc-content .toc-h3 a {
+.toc-content-fixed .toc-h3 a {
   padding-left: 1.5rem;
   font-size: 0.75rem;
 }
 
-.toc-content .toc-h4 a {
+.toc-content-fixed .toc-h4 a {
   padding-left: 2rem;
   font-size: 0.7rem;
+}
+
+/* ===== SUBTOPICS STYLING ===== */
+.toc-content-fixed .subtopics {
+  display: none;
+  background: rgba(79, 172, 254, 0.03);
+}
+
+.toc-content-fixed .subtopics.expanded {
+  display: block;
+}
+
+.toc-content-fixed .subtopics a {
+  padding-left: 2rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #7f8c8d);
 }
 
 /* ===== POST NAVIGATION ===== */
@@ -263,12 +281,15 @@
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {
   .post-sidebar {
-    width: 280px;
+    width: 300px;
+  }
+  
+  .main-content-division {
+    margin-left: 300px;
+    width: calc(100% - 300px);
   }
   
   .post-content {
-    margin-left: 280px;
-    width: calc(100% - 280px);
     padding: 1.5rem;
   }
   
@@ -286,20 +307,21 @@
     position: relative;
     width: 100%;
     height: auto;
+    max-height: 400px;
+    overflow-y: auto;
     margin-bottom: 1rem;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     border-right: none;
     border-bottom: 2px solid rgba(79, 172, 254, 0.2);
   }
   
-  .post-content {
+  .main-content-division {
     margin-left: 0;
     width: 100%;
-    padding: 1rem;
   }
   
-  .toc-content {
-    max-height: 200px;
+  .post-content {
+    padding: 1rem;
   }
   
   .post-info .post-title {

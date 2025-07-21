@@ -3,62 +3,68 @@ layout: default
 ---
 
 <div class="post-layout">
+  <!-- Fixed Sidebar Division -->
   <aside class="post-sidebar">
-    <div class="post-info">
-      <h1 class="post-title">{{ page.title | escape }}</h1>
-      <div class="post-meta-sidebar">
-        <div class="meta-item">
-          <span class="meta-label">Published</span>
-          <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
-        </div>
-        {% if page.categories.size > 0 %}
-        <div class="meta-item">
-          <span class="meta-label">Category</span>
-          <span class="meta-value">{{ page.categories | join: ", " }}</span>
-        </div>
-        {% endif %}
-        {% if page.tags.size > 0 %}
-        <div class="meta-item">
-          <span class="meta-label">Tags</span>
-          <div class="tag-list">
-            {% for tag in page.tags %}
-            <span class="tag-minimal">{{ tag }}</span>
-            {% endfor %}
+    <div class="sidebar-content">
+      <div class="post-info">
+        <h1 class="post-title">{{ page.title | escape }}</h1>
+        <div class="post-meta-sidebar">
+          <div class="meta-item">
+            <span class="meta-label">Published</span>
+            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+          </div>
+          {% if page.categories.size > 0 %}
+          <div class="meta-item">
+            <span class="meta-label">Category</span>
+            <span class="meta-value">{{ page.categories | join: ", " }}</span>
+          </div>
+          {% endif %}
+          {% if page.tags.size > 0 %}
+          <div class="meta-item">
+            <span class="meta-label">Tags</span>
+            <div class="tag-list">
+              {% for tag in page.tags %}
+              <span class="tag-minimal">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          <div class="meta-item">
+            <span class="meta-label">Read time</span>
+            <span class="meta-value">{{ content | number_of_words | divided_by: 200 | ceil }} min read</span>
           </div>
         </div>
-        {% endif %}
-        <div class="meta-item">
-          <span class="meta-label">Read time</span>
-          <span class="meta-value">{{ content | number_of_words | divided_by: 200 | ceil }} min read</span>
-        </div>
-      </div>
-      
-      <div class="table-of-contents">
-        <div class="toc-header" onclick="toggleTOC()">
-          <h3>Contents</h3>
-          <span class="toc-toggle" id="toc-toggle">▼</span>
-        </div>
-        <div class="toc-content" id="toc-content">
-          <div id="toc"></div>
+        
+        <!-- Fixed Table of Contents - All Topics Visible -->
+        <div class="table-of-contents">
+          <div class="toc-header">
+            <h3>Contents</h3>
+          </div>
+          <div class="toc-content-fixed" id="toc-content">
+            <div id="toc"></div>
+          </div>
         </div>
       </div>
     </div>
   </aside>
   
-  <main class="post-content">
-    <article class="linear-article">
-      {{ content }}
-    </article>
-    
-    <nav class="post-navigation">
-      {% if page.previous.url %}
-        <a class="nav-prev" href="{{ page.previous.url | relative_url }}">&larr; {{ page.previous.title | truncate: 50 }}</a>
-      {% endif %}
-      {% if page.next.url %}
-        <a class="nav-next" href="{{ page.next.url | relative_url }}">{{ page.next.title | truncate: 50 }} &rarr;</a>
-      {% endif %}
-    </nav>
-  </main>
+  <!-- Main Content Division -->
+  <div class="main-content-division">
+    <main class="post-content">
+      <article class="linear-article">
+        {{ content }}
+      </article>
+      
+      <nav class="post-navigation">
+        {% if page.previous.url %}
+          <a class="nav-prev" href="{{ page.previous.url | relative_url }}">&larr; {{ page.previous.title | truncate: 50 }}</a>
+        {% endif %}
+        {% if page.next.url %}
+          <a class="nav-next" href="{{ page.next.url | relative_url }}">{{ page.next.title | truncate: 50 }} &rarr;</a>
+        {% endif %}
+      </nav>
+    </main>
+  </div>
 </div>
 
 <script src="{{ '/assets/js/post.js' | relative_url }}"></script>
