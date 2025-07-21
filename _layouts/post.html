@@ -34,8 +34,13 @@ layout: default
       </div>
       
       <div class="table-of-contents">
-        <h3>Contents</h3>
-        <div id="toc"></div>
+        <div class="toc-header" onclick="toggleTOC()">
+          <h3>Contents</h3>
+          <span class="toc-toggle" id="toc-toggle">▼</span>
+        </div>
+        <div class="toc-content" id="toc-content">
+          <div id="toc"></div>
+        </div>
       </div>
     </div>
   </aside>
@@ -68,14 +73,111 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   let tocHTML = '<ul>';
+  let currentLevel = 2;
+  
   headings.forEach(function(heading, index) {
     const id = 'heading-' + index;
     heading.id = id;
-    const level = heading.tagName.toLowerCase();
-    const indent = level === 'h3' ? 'toc-h3' : level === 'h4' ? 'toc-h4' : '';
-    tocHTML += `<li class="${indent}"><a href="#${id}">${heading.textContent}</a></li>`;
+    const level = parseInt(heading.tagName.substring(1));
+    const indent = level === 3 ? 'toc-h3' : level === 4 ? 'toc-h4' : '';
+    
+    // Add collapsible functionality for h2 headings
+    if (level === 2) {
+      tocHTML += `<li class="toc-section">
+        <div class="toc-section-header" onclick="toggleSection(this)">
+          <span class="toc-arrow">▼</span>
+          <a href="#${id}">${heading.textContent}</a>
+        </div>
+        <ul class="toc-subsection">`;
+    } else {
+      tocHTML += `<li class="${indent}"><a href="#${id}">${heading.textContent}</a></li>`;
+    }
+    
+    // Close subsection for h2 headings if next is also h2 or end
+    const nextHeading = headings[index + 1];
+    if (level === 2 && (!nextHeading || parseInt(nextHeading.tagName.substring(1)) === 2)) {
+      tocHTML += '</ul></li>';
+    }
   });
+  
   tocHTML += '</ul>';
   toc.innerHTML = tocHTML;
+  
+  // Add active heading highlighting
+  highlightActiveHeading();
+  window.addEventListener('scroll', highlightActiveHeading);
+});
+
+// Toggle table of contents visibility
+function toggleTOC() {
+  const content = document.getElementById('toc-content');
+  const toggle = document.getElementById('toc-toggle');
+  
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    toggle.textContent = '▼';
+  } else {
+    content.style.display = 'none';
+    toggle.textContent = '▶';
+  }
+}
+
+// Toggle individual sections in TOC
+function toggleSection(header) {
+  const arrow = header.querySelector('.toc-arrow');
+  const subsection = header.parentElement.querySelector('.toc-subsection');
+  
+  if (subsection.style.display === 'none') {
+    subsection.style.display = 'block';
+    arrow.textContent = '▼';
+  } else {
+    subsection.style.display = 'none';
+    arrow.textContent = '▶';
+  }
+}
+
+// Highlight active heading in TOC
+function highlightActiveHeading() {
+  const headings = document.querySelectorAll('.linear-article h2, .linear-article h3, .linear-article h4');
+  const tocLinks = document.querySelectorAll('.table-of-contents a');
+  
+  let activeHeading = null;
+  
+  headings.forEach(function(heading) {
+    const rect = heading.getBoundingClientRect();
+    if (rect.top <= 100) {
+      activeHeading = heading;
+    }
+  });
+  
+  // Remove active class from all links
+  tocLinks.forEach(function(link) {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current heading
+  if (activeHeading) {
+    const activeLink = document.querySelector(`a[href="#${activeHeading.id}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+  }
+}
+
+// Smooth scroll for TOC links
+document.addEventListener('click', function(e) {
+  if (e.target.matches('.table-of-contents a')) {
+    e.preventDefault();
+    const targetId = e.target.getAttribute('href').substring(1);
+    const targetElement = document.getElementById(targetId);
+    
+    if (targetElement) {
+      const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 100;
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      });
+    }
+  }
 });
 </script>
