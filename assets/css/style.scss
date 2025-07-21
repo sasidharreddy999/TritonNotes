@@ -495,15 +495,16 @@ body {
   margin: 0 auto;
   padding: 2rem;
   min-height: 100vh;
-  align-items: start; /* This ensures proper alignment */
+  align-items: start;
 }
 
-.post-sidebar {
-  position: -webkit-sticky; /* Safari support */
-  position: sticky;
-  top: 2rem; /* Reduced from 100px for better positioning */
-  height: fit-content; /* Changed from calc height */
-  max-height: calc(100vh - 4rem); /* Ensure it doesn't exceed viewport */
+/* Higher specificity to override any theme conflicts */
+.post-layout .post-sidebar {
+  position: -webkit-sticky !important; /* Safari support */
+  position: sticky !important;
+  top: 2rem !important;
+  height: fit-content !important;
+  max-height: calc(100vh - 4rem) !important;
   overflow-y: auto;
   background: var(--bg-card);
   border-radius: var(--border-radius);
@@ -512,7 +513,10 @@ body {
   border-left: 4px solid;
   border-image: var(--accent-gradient) 1;
   z-index: 100;
-  align-self: start; /* Important: prevent stretching */
+  align-self: start !important;
+  width: 320px; /* Fixed width to prevent flexing */
+  min-width: 320px;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 /* Custom scrollbar for sidebar */
