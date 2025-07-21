@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   let tocHTML = '<ul>';
   let currentLevel = 2;
+  let openSections = []; // Track open sections
   
   headings.forEach(function(heading, index) {
     const id = 'heading-' + index;
@@ -81,24 +82,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const level = parseInt(heading.tagName.substring(1));
     const indent = level === 3 ? 'toc-h3' : level === 4 ? 'toc-h4' : '';
     
+    // Close previous sections if needed
+    while (openSections.length > 0 && openSections[openSections.length - 1] >= level) {
+      tocHTML += '</ul></li>';
+      openSections.pop();
+    }
+    
     // Add collapsible functionality for h2 headings
     if (level === 2) {
       tocHTML += `<li class="toc-section">
         <div class="toc-section-header" onclick="toggleSection(this)">
-          <span class="toc-arrow">▼</span>
+          <span class="toc-arrow">▶</span>
           <a href="#${id}">${heading.textContent}</a>
         </div>
         <ul class="toc-subsection">`;
+      openSections.push(level);
     } else {
       tocHTML += `<li class="${indent}"><a href="#${id}">${heading.textContent}</a></li>`;
     }
-    
-    // Close subsection for h2 headings if next is also h2 or end
-    const nextHeading = headings[index + 1];
-    if (level === 2 && (!nextHeading || parseInt(nextHeading.tagName.substring(1)) === 2)) {
-      tocHTML += '</ul></li>';
-    }
   });
+  
+  // Close all remaining open sections
+  while (openSections.length > 0) {
+    tocHTML += '</ul></li>';
+    openSections.pop();
+  }
   
   tocHTML += '</ul>';
   toc.innerHTML = tocHTML;
