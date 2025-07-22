@@ -2,69 +2,88 @@
 layout: default
 ---
 
-<div class="post-layout">
-  <!-- Fixed Sidebar Division -->
+<div class="post-container">
+  <!-- Left Sidebar -->
   <aside class="post-sidebar">
-    <div class="sidebar-content">
-      <div class="post-info">
+    <div class="sidebar-wrapper">
+      <!-- Post Metadata -->
+      <div class="post-meta-section">
         <h1 class="post-title">{{ page.title | escape }}</h1>
-        <div class="post-meta-sidebar">
-          <div class="meta-item">
-            <span class="meta-label">Published</span>
-            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+        
+        <div class="meta-grid">
+          <div class="meta-row">
+            <span class="meta-key">Published</span>
+            <time class="meta-value" datetime="{{ page.date | date_to_xmlschema }}">
+              {{ page.date | date: "%B %d, %Y" }}
+            </time>
           </div>
+          
           {% if page.categories.size > 0 %}
-          <div class="meta-item">
-            <span class="meta-label">Category</span>
+          <div class="meta-row">
+            <span class="meta-key">Category</span>
             <span class="meta-value">{{ page.categories | join: ", " }}</span>
           </div>
           {% endif %}
+          
           {% if page.tags.size > 0 %}
-          <div class="meta-item">
-            <span class="meta-label">Tags</span>
-            <div class="tag-list">
+          <div class="meta-row">
+            <span class="meta-key">Tags</span>
+            <div class="tag-container">
               {% for tag in page.tags %}
-              <span class="tag-minimal">{{ tag }}</span>
+              <span class="tag-pill">{{ tag }}</span>
               {% endfor %}
             </div>
           </div>
           {% endif %}
-          <div class="meta-item">
-            <span class="meta-label">Read time</span>
-            <span class="meta-value">{{ content | number_of_words | divided_by: 200 | ceil }} min read</span>
-          </div>
-        </div>
-        
-        <!-- Fixed Table of Contents - All Topics Visible -->
-        <div class="table-of-contents">
-          <div class="toc-header">
-            <h3>Contents</h3>
-          </div>
-          <div class="toc-content-fixed" id="toc-content">
-            <div id="toc"></div>
+          
+          <div class="meta-row">
+            <span class="meta-key">Reading time</span>
+            <span class="meta-value">{{ content | number_of_words | divided_by: 200 | ceil }} min</span>
           </div>
         </div>
       </div>
+      
+      <!-- Table of Contents -->
+      <nav class="toc-navigation">
+        <div class="toc-title">
+          <h3>Contents</h3>
+          <button class="toc-toggle" id="toc-toggle" aria-label="Toggle table of contents">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="toc-content" id="toc-content">
+          <div id="toc-list"></div>
+        </div>
+      </nav>
     </div>
   </aside>
   
-  <!-- Main Content Division -->
-  <div class="main-content-division">
-    <main class="post-content">
-      <article class="linear-article">
+  <!-- Main Content Area -->
+  <main class="post-main">
+    <article class="post-article">
+      <div class="article-content">
         {{ content }}
-      </article>
-      
-      <nav class="post-navigation">
-        {% if page.previous.url %}
-          <a class="nav-prev" href="{{ page.previous.url | relative_url }}">&larr; {{ page.previous.title | truncate: 50 }}</a>
-        {% endif %}
-        {% if page.next.url %}
-          <a class="nav-next" href="{{ page.next.url | relative_url }}">{{ page.next.title | truncate: 50 }} &rarr;</a>
-        {% endif %}
-      </nav>
-    </main>
-  </div>
+      </div>
+    </article>
+    
+    <!-- Post Navigation -->
+    <nav class="post-nav">
+      {% if page.previous.url %}
+        <a href="{{ page.previous.url | relative_url }}" class="nav-link nav-prev">
+          <div class="nav-direction">← Previous</div>
+          <div class="nav-title">{{ page.previous.title }}</div>
+        </a>
+      {% endif %}
+      {% if page.next.url %}
+        <a href="{{ page.next.url | relative_url }}" class="nav-link nav-next">
+          <div class="nav-direction">Next →</div>
+          <div class="nav-title">{{ page.next.title }}</div>
+        </a>
+      {% endif %}
+    </nav>
+  </main>
 </div>
 
 <script src="{{ '/assets/js/post.js' | relative_url }}"></script>

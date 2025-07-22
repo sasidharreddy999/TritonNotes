@@ -1,276 +1,315 @@
-// Enhanced Table of Contents Generator for Fixed Sidebar Layout
+// Modern Table of Contents with Smooth Interactions - Lei.Chat Style
 document.addEventListener('DOMContentLoaded', function() {
-  generateFixedTOC();
-  initializeTopicExpansion();
-  initializeScrollspy();
+  generateTOC();
+  initializeScrollSpy();
+  initializeTOCToggle();
   initializeSmoothScrolling();
+  initializeKeyboardShortcuts();
 });
 
-// Generate a fixed table of contents with expansion functionality
-function generateFixedTOC() {
-  const toc = document.getElementById('toc');
-  const headings = document.querySelectorAll('.linear-article h2, .linear-article h3, .linear-article h4');
+// Generate clean table of contents
+function generateTOC() {
+  const tocList = document.getElementById('toc-list');
+  const headings = document.querySelectorAll('.article-content h1, .article-content h2, .article-content h3, .article-content h4');
   
-  if (!toc || headings.length === 0) {
-    const tocContainer = document.querySelector('.table-of-contents');
-    if (tocContainer) {
-      tocContainer.style.display = 'none';
-    }
+  if (!tocList || headings.length === 0) {
+    const tocNav = document.querySelector('.toc-navigation');
+    if (tocNav) tocNav.style.display = 'none';
     return;
   }
   
   let tocHTML = '<ul>';
-  let currentH2 = null;
-  let h2SubTopics = [];
   
-  headings.forEach(function(heading, index) {
-    const id = 'heading-' + index;
+  headings.forEach((heading, index) => {
+    const id = heading.id || `heading-${index}`;
     heading.id = id;
-    const level = parseInt(heading.tagName.substring(1));
-    const levelClass = 'toc-h' + level;
     
-    if (level === 2) {
-      // Close previous H2 subtopics if any
-      if (currentH2 !== null && h2SubTopics.length > 0) {
-        tocHTML += '<div class="subtopics" data-parent="' + currentH2 + '">';
-        h2SubTopics.forEach(function(subtopic) {
-          tocHTML += subtopic;
-        });
-        tocHTML += '</div>';
-        h2SubTopics = [];
-      }
-      
-      // Add H2 as main topic
-      currentH2 = id;
-      tocHTML += `<li class="${levelClass}">
-        <a href="#${id}" class="topic-link" data-topic="${id}">${heading.textContent.trim()}</a>
-      </li>`;
-    } else if (level === 3 || level === 4) {
-      // Add H3/H4 as subtopics
-      h2SubTopics.push(`<li class="${levelClass}">
-        <a href="#${id}">${heading.textContent.trim()}</a>
-      </li>`);
-    }
+    const level = parseInt(heading.tagName.substring(1));
+    const text = heading.textContent.trim();
+    const levelClass = `toc-h${level}`;
+    
+    tocHTML += `
+      <li class="${levelClass}">
+        <a href="#${id}" data-heading="${id}">${text}</a>
+      </li>
+    `;
   });
-  
-  // Close final H2 subtopics if any
-  if (currentH2 !== null && h2SubTopics.length > 0) {
-    tocHTML += '<div class="subtopics" data-parent="' + currentH2 + '">';
-    h2SubTopics.forEach(function(subtopic) {
-      tocHTML += subtopic;
-    });
-    tocHTML += '</div>';
-  }
   
   tocHTML += '</ul>';
-  toc.innerHTML = tocHTML;
+  tocList.innerHTML = tocHTML;
 }
 
-// Initialize topic expansion functionality
-function initializeTopicExpansion() {
-  let currentlyExpanded = null;
+// Advanced scroll spy with smooth active state updates
+function initializeScrollSpy() {
+  const headings = Array.from(document.querySelectorAll('.article-content h1, .article-content h2, .article-content h3, .article-content h4'));
+  const tocLinks = Array.from(document.querySelectorAll('#toc-list a'));
   
-  // Handle topic clicks
-  document.addEventListener('click', function(e) {
-    if (e.target.matches('.topic-link')) {
-      e.preventDefault();
-      
-      const topicId = e.target.getAttribute('data-topic');
-      const subtopicsDiv = document.querySelector(`[data-parent="${topicId}"]`);
-      
-      if (!subtopicsDiv) return;
-      
-      // Collapse previously expanded topic
-      if (currentlyExpanded && currentlyExpanded !== topicId) {
-        const prevSubtopics = document.querySelector(`[data-parent="${currentlyExpanded}"]`);
-        const prevTopicLink = document.querySelector(`[data-topic="${currentlyExpanded}"]`);
-        
-        if (prevSubtopics) {
-          prevSubtopics.classList.remove('expanded');
-        }
-        if (prevTopicLink) {
-          prevTopicLink.classList.remove('expanded');
-        }
-      }
-      
-      // Toggle current topic
-      if (currentlyExpanded === topicId) {
-        // Collapse current topic
-        subtopicsDiv.classList.remove('expanded');
-        e.target.classList.remove('expanded');
-        currentlyExpanded = null;
-      } else {
-        // Expand current topic
-        subtopicsDiv.classList.add('expanded');
-        e.target.classList.add('expanded');
-        currentlyExpanded = topicId;
-      }
-      
-      // Scroll to the heading
-      const targetElement = document.getElementById(topicId);
-      if (targetElement) {
-        const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 80;
-        window.scrollTo({
-          top: offsetTop,
-          behavior: 'smooth'
-        });
-        
-        // Update URL
-        history.replaceState(null, null, '#' + topicId);
-      }
-    }
-  });
-}
-
-// Enhanced scrollspy for active heading highlighting
-function initializeScrollspy() {
-  let ticking = false;
+  if (headings.length === 0 || tocLinks.length === 0) return;
+  
+  let isScrolling = false;
+  let currentActiveLink = null;
   
   function updateActiveHeading() {
-    const headings = document.querySelectorAll('.linear-article h2, .linear-article h3, .linear-article h4');
-    const tocLinks = document.querySelectorAll('.toc-content-fixed a');
+    if (isScrolling) return;
     
+    const scrollTop = window.pageYOffset;
+    const windowHeight = window.innerHeight;
+    
+    // Find the currently visible heading
     let activeHeading = null;
     let closestDistance = Infinity;
     
-    // Find the heading closest to the top of the viewport
-    headings.forEach(function(heading) {
+    headings.forEach(heading => {
       const rect = heading.getBoundingClientRect();
-      const distance = Math.abs(rect.top - 100);
+      const absoluteTop = scrollTop + rect.top;
       
-      if (rect.top <= 150 && distance < closestDistance) {
-        activeHeading = heading;
-        closestDistance = distance;
+      // Check if heading is in the upper half of the viewport
+      if (rect.top <= windowHeight * 0.3 && rect.top >= -rect.height) {
+        const distance = Math.abs(rect.top - 100);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          activeHeading = heading;
+        }
       }
     });
     
-    // Remove active class from all links
-    tocLinks.forEach(function(link) {
-      link.classList.remove('active');
-    });
-    
-    // Add active class to current heading
-    if (activeHeading) {
-      const activeLink = document.querySelector(`a[href="#${activeHeading.id}"]`);
-      if (activeLink) {
-        activeLink.classList.add('active');
-        
-        // Auto-expand parent topic if it's a subtopic
-        const parentSubtopics = activeLink.closest('.subtopics');
-        if (parentSubtopics && !parentSubtopics.classList.contains('expanded')) {
-          const parentId = parentSubtopics.getAttribute('data-parent');
-          const parentTopicLink = document.querySelector(`[data-topic="${parentId}"]`);
-          
-          // Collapse any currently expanded topic first
-          const currentExpanded = document.querySelector('.topic-link.expanded');
-          if (currentExpanded && currentExpanded !== parentTopicLink) {
-            const currentSubtopics = document.querySelector(`[data-parent="${currentExpanded.getAttribute('data-topic')}"]`);
-            if (currentSubtopics) {
-              currentSubtopics.classList.remove('expanded');
-              currentExpanded.classList.remove('expanded');
-            }
-          }
-          
-          // Expand the parent topic
-          if (parentTopicLink) {
-            parentSubtopics.classList.add('expanded');
-            parentTopicLink.classList.add('expanded');
-          }
+    // If no heading in viewport, use the last passed heading
+    if (!activeHeading && scrollTop > 100) {
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const rect = headings[i].getBoundingClientRect();
+        if (rect.top <= windowHeight * 0.3) {
+          activeHeading = headings[i];
+          break;
         }
       }
     }
     
-    ticking = false;
+    // Update active link
+    const newActiveLink = activeHeading ? 
+      document.querySelector(`a[data-heading="${activeHeading.id}"]`) : null;
+    
+    if (newActiveLink !== currentActiveLink) {
+      // Remove previous active state
+      if (currentActiveLink) {
+        currentActiveLink.classList.remove('active');
+      }
+      
+      // Add new active state
+      if (newActiveLink) {
+        newActiveLink.classList.add('active');
+        
+        // Smooth scroll TOC to keep active item visible
+        const tocContent = document.querySelector('.toc-content');
+        if (tocContent) {
+          const linkRect = newActiveLink.getBoundingClientRect();
+          const tocRect = tocContent.getBoundingClientRect();
+          
+          if (linkRect.bottom > tocRect.bottom || linkRect.top < tocRect.top) {
+            newActiveLink.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+        }
+      }
+      
+      currentActiveLink = newActiveLink;
+    }
   }
   
+  // Optimized scroll listener
+  let ticking = false;
   function onScroll() {
     if (!ticking) {
-      requestAnimationFrame(updateActiveHeading);
+      requestAnimationFrame(() => {
+        updateActiveHeading();
+        ticking = false;
+      });
       ticking = true;
     }
   }
   
-  window.addEventListener('scroll', onScroll);
-  // Initial call
+  window.addEventListener('scroll', onScroll, { passive: true });
+  
+  // Initial update
   updateActiveHeading();
 }
 
-// Enhanced smooth scrolling for all TOC links
+// TOC collapse/expand functionality
+function initializeTOCToggle() {
+  const toggleButton = document.getElementById('toc-toggle');
+  const tocContent = document.getElementById('toc-content');
+  
+  if (!toggleButton || !tocContent) return;
+  
+  let isCollapsed = false;
+  
+  toggleButton.addEventListener('click', () => {
+    isCollapsed = !isCollapsed;
+    
+    if (isCollapsed) {
+      tocContent.style.display = 'none';
+      toggleButton.classList.add('collapsed');
+      toggleButton.setAttribute('aria-expanded', 'false');
+    } else {
+      tocContent.style.display = 'block';
+      toggleButton.classList.remove('collapsed');
+      toggleButton.setAttribute('aria-expanded', 'true');
+    }
+  });
+  
+  // Initialize as expanded
+  toggleButton.setAttribute('aria-expanded', 'true');
+}
+
+// Smooth scrolling for TOC links
 function initializeSmoothScrolling() {
-  document.addEventListener('click', function(e) {
-    if (e.target.matches('.toc-content-fixed a') && !e.target.matches('.topic-link')) {
-      e.preventDefault();
-      const targetId = e.target.getAttribute('href').substring(1);
-      const targetElement = document.getElementById(targetId);
-      
-      if (targetElement) {
-        const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 80;
-        window.scrollTo({
-          top: offsetTop,
-          behavior: 'smooth'
-        });
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('#toc-list a[href^="#"]');
+    if (!link) return;
+    
+    e.preventDefault();
+    
+    const targetId = link.getAttribute('href').slice(1);
+    const targetElement = document.getElementById(targetId);
+    
+    if (!targetElement) return;
+    
+    // Mark as scrolling to prevent scroll spy interference
+    let isScrolling = true;
+    
+    // Calculate offset for better positioning
+    const headerOffset = 80;
+    const elementPosition = targetElement.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
+    // Smooth scroll to target
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+    
+    // Update URL without triggering scroll
+    history.replaceState(null, null, `#${targetId}`);
+    
+    // Re-enable scroll spy after scroll completes
+    setTimeout(() => {
+      isScrolling = false;
+    }, 1000);
+    
+    // Immediate visual feedback
+    document.querySelectorAll('#toc-list a.active').forEach(activeLink => {
+      activeLink.classList.remove('active');
+    });
+    link.classList.add('active');
+  });
+}
+
+// Keyboard shortcuts for navigation
+function initializeKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Ignore if user is typing in an input
+    if (e.target.matches('input, textarea, [contenteditable]')) return;
+    
+    const tocLinks = document.querySelectorAll('#toc-list a');
+    const currentActive = document.querySelector('#toc-list a.active');
+    
+    if (tocLinks.length === 0) return;
+    
+    switch (e.key) {
+      case 'j': // Next heading
+        e.preventDefault();
+        navigateToHeading(tocLinks, currentActive, 1);
+        break;
         
-        // Update URL
-        history.replaceState(null, null, '#' + targetId);
-      }
+      case 'k': // Previous heading
+        e.preventDefault();
+        navigateToHeading(tocLinks, currentActive, -1);
+        break;
+        
+      case 't': // Toggle TOC
+        e.preventDefault();
+        const toggleButton = document.getElementById('toc-toggle');
+        if (toggleButton) toggleButton.click();
+        break;
+        
+      case 'g':
+        if (e.shiftKey) { // G - Go to bottom
+          e.preventDefault();
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else { // g - Go to top
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        break;
     }
   });
 }
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Collapse all topics with 'C' key
-  if (e.key === 'c' || e.key === 'C') {
-    if (!e.target.matches('input, textarea')) {
-      e.preventDefault();
-      const expandedTopics = document.querySelectorAll('.topic-link.expanded');
-      const expandedSubtopics = document.querySelectorAll('.subtopics.expanded');
-      
-      expandedTopics.forEach(function(topic) {
-        topic.classList.remove('expanded');
-      });
-      
-      expandedSubtopics.forEach(function(subtopic) {
-        subtopic.classList.remove('expanded');
-      });
-    }
-  }
+// Helper function for keyboard navigation
+function navigateToHeading(tocLinks, currentActive, direction) {
+  const currentIndex = currentActive ? 
+    Array.from(tocLinks).indexOf(currentActive) : -1;
   
-  // Navigate between topics with arrow keys
-  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-    if (!e.target.matches('input, textarea')) {
-      e.preventDefault();
-      const topicLinks = document.querySelectorAll('.topic-link');
-      const currentActive = document.querySelector('.topic-link.expanded') || topicLinks[0];
-      const currentIndex = Array.from(topicLinks).indexOf(currentActive);
-      
-      let nextIndex;
-      if (e.key === 'ArrowUp') {
-        nextIndex = currentIndex > 0 ? currentIndex - 1 : topicLinks.length - 1;
-      } else {
-        nextIndex = currentIndex < topicLinks.length - 1 ? currentIndex + 1 : 0;
-      }
-      
-      if (topicLinks[nextIndex]) {
-        topicLinks[nextIndex].click();
-      }
+  let nextIndex = currentIndex + direction;
+  
+  // Wrap around
+  if (nextIndex >= tocLinks.length) nextIndex = 0;
+  if (nextIndex < 0) nextIndex = tocLinks.length - 1;
+  
+  if (tocLinks[nextIndex]) {
+    tocLinks[nextIndex].click();
+  }
+}
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', () => {
+  const hash = window.location.hash;
+  if (hash) {
+    const targetElement = document.querySelector(hash);
+    if (targetElement) {
+      setTimeout(() => {
+        const headerOffset = 80;
+        const elementPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }, 100);
     }
   }
 });
 
-// Initialize with all topics collapsed
-document.addEventListener('DOMContentLoaded', function() {
-  // Ensure all subtopics start collapsed
-  setTimeout(function() {
-    const allSubtopics = document.querySelectorAll('.subtopics');
-    const allTopicLinks = document.querySelectorAll('.topic-link');
+// Initialize reading progress indicator (optional enhancement)
+function initializeReadingProgress() {
+  const progressBar = document.createElement('div');
+  progressBar.id = 'reading-progress';
+  progressBar.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(to right, #2563eb, #7c3aed);
+    z-index: 1000;
+    transition: width 0.1s ease;
+  `;
+  document.body.appendChild(progressBar);
+  
+  function updateProgress() {
+    const scrollTop = window.pageYOffset;
+    const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / documentHeight) * 100;
     
-    allSubtopics.forEach(function(subtopic) {
-      subtopic.classList.remove('expanded');
-    });
-    
-    allTopicLinks.forEach(function(link) {
-      link.classList.remove('expanded');
-    });
-  }, 100);
-});
+    progressBar.style.width = Math.min(scrollPercent, 100) + '%';
+  }
+  
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+}
+
+// Initialize reading progress on load
+document.addEventListener('DOMContentLoaded', initializeReadingProgress);
